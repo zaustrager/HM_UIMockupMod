@@ -39,10 +39,10 @@
 	},
 	"3ad08b0b-5338-4455-9d02-5a5ac08a2276": {
 		"CharacterSetIndex": 0,
-		"Description": "“Lord_Zacler”",
+		"Description": "“Target Name”",
 		"Description_LOC": "bio_actor_Super_Targetman",
 		"Image": "images/actors/antihero.jpg",
-		"Name": "“Lord_Zacler”",
+		"Name": "“Target Name”",
 		"Outfit": "5f19af97-4ad1-46e4-aaf6-46f856519072",
 		"OutfitVariationIndex": 0,
 		"Tile": "images/actors/antihero.jpg"
