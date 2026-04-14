@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Manifest Editor — Zach's Modded Campaign</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0d0e11;
+    --surface: #16181d;
+    --surface-2: #1e2027;
+    --border: #2a2c35;
+    --border-focus: #4f6ef7;
+    --text: #e8eaf0;
+    --text-muted: #7a7f91;
+    --text-label: #b0b5c8;
+    --accent: #4f6ef7;
+    --accent-hover: #3d5ce8;
+    --accent-glow: rgba(79,110,247,.15);
+    --green: #4caf7d;
+    --green-bg: rgba(76,175,125,.1);
+    --green-border: rgba(76,175,125,.3);
+    --yellow: #d4a843;
+    --yellow-bg: rgba(212,168,67,.1);
+    --yellow-border: rgba(212,168,67,.3);
+    --red: #e05050;
+    --red-bg: rgba(224,80,80,.08);
+    --red-border: rgba(224,80,80,.3);
+    --radius: 8px;
+    --radius-lg: 12px;
+  }
+
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+    font-size: 14px; line-height: 1.6; min-height: 100vh;
+  }
+
+  /* Header */
+  .app-header {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(13,14,17,.95); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 24px; display: flex; flex-direction: column; gap: 10px;
+  }
+  .header-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .header-left { display: flex; align-items: center; gap: 14px; }
+  .header-badge {
+    background: var(--accent); color: #fff; font-weight: 700;
+    font-size: 11px; letter-spacing: .08em; padding: 4px 8px; border-radius: 6px;
+  }
+  .header-title { font-size: 17px; font-weight: 600; letter-spacing: -.01em; }
+  .header-subtitle { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
+  .header-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+  /* Folder bar */
+  .folder-bar {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 12px; border-radius: var(--radius);
+    border: 1px solid var(--border); background: var(--surface-2);
+    font-size: 12px; flex-wrap: wrap;
+  }
+  .folder-bar.linked  { border-color: var(--green-border); background: var(--green-bg); }
+  .folder-bar.warning { border-color: var(--yellow-border); background: var(--yellow-bg); }
+  .folder-bar.error   { border-color: var(--red-border); background: var(--red-bg); }
+  .folder-bar-text { color: var(--text-muted); flex: 1; min-width: 0; }
+  .folder-bar.linked  .folder-bar-text { color: var(--green); }
+  .folder-bar.warning .folder-bar-text { color: var(--yellow); }
+  .folder-bar.error   .folder-bar-text { color: var(--red); }
+  .folder-name {
+    font-family: "SF Mono","Fira Code",Menlo,monospace; font-weight: 600; color: var(--text);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px;
+  }
+  .folder-routes { display: flex; gap: 6px; flex-wrap: wrap; }
+  .folder-route {
+    font-family: "SF Mono","Fira Code",Menlo,monospace;
+    font-size: 10px; color: var(--green);
+    background: var(--green-bg); border: 1px solid var(--green-border);
+    border-radius: 4px; padding: 1px 6px;
+  }
+
+  /* Main */
+  main {
+    max-width: 860px; width: 100%; margin: 0 auto;
+    padding: 32px 24px 64px; display: flex; flex-direction: column; gap: 24px;
+  }
+
+  /* Section */
+  .section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+  .section-header {
+    display: flex; align-items: center; gap: 10px; padding: 14px 20px;
+    background: var(--surface-2); border-bottom: 1px solid var(--border);
+  }
+  .section-icon { font-size: 16px; }
+  .section-title { font-size: 13px; font-weight: 600; letter-spacing: .03em; text-transform: uppercase; }
+  .section-body { padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+
+  /* Fields */
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .field-group { display: flex; flex-direction: column; gap: 6px; }
+  .field-label { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px; font-size: 13px; font-weight: 500; color: var(--text-label); }
+  .field-key {
+    font-family: "SF Mono","Fira Code",Menlo,monospace; font-size: 10px; color: var(--text-muted);
+    background: rgba(255,255,255,.04); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px;
+  }
+  .field-input {
+    background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius);
+    color: var(--text); font-size: 14px; padding: 9px 12px; width: 100%;
+    transition: border-color .15s, box-shadow .15s; outline: none; font-family: inherit; line-height: 1.5;
+  }
+  .field-input:focus { border-color: var(--border-focus); box-shadow: 0 0 0 3px var(--accent-glow); }
+  .field-input::placeholder { color: var(--text-muted); opacity: .7; }
+  textarea.field-input { resize: vertical; min-height: 100px; }
+
+  .sync-badge {
+    display: inline-flex; align-items: center; gap: 3px; font-size: 10px; font-weight: 500;
+    color: #7cc47c; background: rgba(124,196,124,.1); border: 1px solid rgba(124,196,124,.25);
+    border-radius: 4px; padding: 1px 6px; white-space: nowrap;
+  }
+
+  /* Repo preview */
+  .repo-preview {
+    background: rgba(79,110,247,.04); border: 1px solid rgba(79,110,247,.2);
+    border-radius: var(--radius); overflow: hidden; margin-top: 4px;
+  }
+  .repo-preview-header {
+    display: flex; align-items: center; gap: 8px; padding: 8px 14px;
+    background: rgba(79,110,247,.07); border-bottom: 1px solid rgba(79,110,247,.15);
+    font-size: 11px; color: var(--text-muted);
+  }
+  .repo-uuid { font-family: "SF Mono","Fira Code",Menlo,monospace; font-size: 10px; color: #8899ff; }
+  .repo-preview-fields { padding: 10px 14px; display: flex; flex-direction: column; gap: 6px; }
+  .repo-preview-row { display: flex; align-items: baseline; gap: 10px; }
+  .repo-field-name { font-family: "SF Mono","Fira Code",Menlo,monospace; font-size: 10px; color: #8899ff; min-width: 80px; flex-shrink: 0; }
+  .repo-field-value { color: var(--text); font-size: 12px; word-break: break-word; }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: var(--radius);
+    font-size: 13px; font-weight: 500; cursor: pointer; border: none;
+    transition: background .15s, color .15s, opacity .15s; white-space: nowrap; font-family: inherit;
+  }
+  .btn:active { opacity: .85; }
+  .btn:disabled { opacity: .45; cursor: not-allowed; }
+  .btn-ghost { background: transparent; color: var(--text-muted); border: 1px solid var(--border); }
+  .btn-ghost:hover { background: var(--surface-2); color: var(--text); }
+  .btn-secondary { background: var(--surface-2); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover:not(:disabled) { background: var(--border); }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover:not(:disabled) { background: var(--accent-hover); }
+  .btn-folder { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); padding: 5px 12px; font-size: 12px; }
+  .btn-folder:hover { background: rgba(76,175,125,.18); }
+
+  /* Toast stack */
+  .toast-stack {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    display: flex; flex-direction: column; gap: 8px; align-items: center;
+    z-index: 999; pointer-events: none;
+  }
+  .toast {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 10px 18px;
+    font-size: 13px; color: var(--text);
+    box-shadow: 0 4px 24px rgba(0,0,0,.4);
+    opacity: 0; transition: opacity .2s; white-space: nowrap;
+  }
+  .toast.show { opacity: 1; }
+  .toast.success { border-color: var(--green-border); color: var(--green); background: var(--green-bg); }
+  .toast.error   { border-color: var(--red-border);   color: var(--red);   background: var(--red-bg); }
+  .toast.warning { border-color: var(--yellow-border); color: var(--yellow); background: var(--yellow-bg); }
+
+  /* Image uploaders */
+  .img-upload-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+  .img-uploader {
+    display: flex; flex-direction: column; gap: 10px;
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 14px;
+  }
+  .img-uploader-label { font-size: 13px; font-weight: 500; color: var(--text-label); }
+  .img-drop-zone {
+    position: relative;
+    width: 100%; aspect-ratio: 16/9;
+    border: 2px dashed var(--border); border-radius: var(--radius);
+    background: var(--surface-2); overflow: hidden;
+    cursor: pointer; transition: border-color .15s, background .15s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .img-drop-zone:hover, .img-drop-zone.drag-over {
+    border-color: var(--border-focus); background: var(--accent-glow);
+  }
+  .img-drop-zone input[type=file] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+  }
+  .img-drop-zone img {
+    width: 100%; height: 100%; object-fit: cover; display: none;
+  }
+  .img-drop-zone img.visible { display: block; }
+  .img-placeholder {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    color: var(--text-muted); font-size: 12px; pointer-events: none; text-align: center; padding: 8px;
+  }
+  .img-placeholder-icon { font-size: 22px; }
+  .img-drop-zone img.visible + .img-placeholder { display: none; }
+  .img-paths { display: flex; flex-direction: column; gap: 4px; }
+  .img-path {
+    font-family: "SF Mono","Fira Code",Menlo,monospace; font-size: 10px;
+    color: var(--text-muted); background: rgba(255,255,255,.03);
+    border: 1px solid var(--border); border-radius: 4px; padding: 3px 7px;
+    word-break: break-all;
+  }
+  .img-path.multi-dest { color: #8899ff; border-color: rgba(136,153,255,.25); background: rgba(136,153,255,.05); }
+  .img-actions { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .img-filename { font-size: 11px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+  .img-filename.ready { color: var(--green); }
+  .img-no-folder-note {
+    font-size: 11px; color: var(--yellow); background: var(--yellow-bg);
+    border: 1px solid var(--yellow-border); border-radius: 4px; padding: 6px 10px;
+    margin-top: 2px;
+  }
+
+  @media (max-width: 640px) {
+    .field-row { grid-template-columns: 1fr; }
+    .app-header { padding: 12px 16px; }
+    main { padding: 24px 16px 48px; }
+    .folder-name { max-width: 130px; }
+    .img-upload-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="header-row">
+    <div class="header-left">
+      <div class="header-badge">MOD</div>
+      <div>
+        <div class="header-title">Manifest Editor</div>
+        <div class="header-subtitle">Zach's Modded Campaign — localisation &amp; repository fields</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-ghost" onclick="resetAll()">Reset</button>
+      <button class="btn btn-secondary" id="btn-manifest" onclick="doSaveManifest()">manifest.json</button>
+      <button class="btn btn-secondary" id="btn-repo" onclick="doSaveRepo()">repository.json</button>
+      <button class="btn btn-primary" id="btn-both" onclick="doSaveBoth()">Save All</button>
+    </div>
+  </div>
+
+  <div class="folder-bar" id="folder-bar">
+    <span>📁</span>
+    <span class="folder-bar-text" id="folder-bar-text">No mod folder selected — files will save to your Downloads folder.</span>
+    <button class="btn btn-folder" id="btn-pick-folder" onclick="pickFolder()">Set Mod Folder</button>
+  </div>
+</header>
+
+<main>
+
+  <div class="section">
+    <div class="section-header"><span class="section-icon">📍</span><span class="section-title">Mission Location</span></div>
+    <div class="section-body">
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label" for="UI_LOCATION_PARENT_MODLANDIA_COUNTRY">Parent Region Country <span class="field-key">UI_LOCATION_PARENT_MODLANDIA_COUNTRY</span></label>
+          <input class="field-input" id="UI_LOCATION_PARENT_MODLANDIA_COUNTRY" type="text" placeholder="e.g. USA" oninput="sync(this)" />
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="UI_LOCATION_MODTOWN_COUNTRY">Modtown Country <span class="field-key">UI_LOCATION_MODTOWN_COUNTRY</span></label>
+          <input class="field-input" id="UI_LOCATION_MODTOWN_COUNTRY" type="text" placeholder="e.g. USA" oninput="sync(this)" />
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label" for="UI_LOCATION_PARENT_MODLANDIA_CITY">Parent Region Locale / City <span class="field-key">UI_LOCATION_PARENT_MODLANDIA_CITY</span></label>
+          <input class="field-input" id="UI_LOCATION_PARENT_MODLANDIA_CITY" type="text" placeholder="e.g. Waterville Valley" oninput="sync(this)" />
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="UI_LOCATION_MODTOWN_CITY">Modtown Locale / City <span class="field-key">UI_LOCATION_MODTOWN_CITY</span></label>
+          <input class="field-input" id="UI_LOCATION_MODTOWN_CITY" type="text" placeholder="e.g. Waterville Valley" oninput="sync(this)" />
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="UI_LOCATION_MODTOWN_TITLE">Mission Name (Location Title) <span class="field-key">UI_LOCATION_MODTOWN_TITLE</span></label>
+        <input class="field-input" id="UI_LOCATION_MODTOWN_TITLE" type="text" placeholder="e.g. River Madness" oninput="sync(this)" />
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header"><span class="section-icon">📋</span><span class="section-title">Mission Briefing</span></div>
+    <div class="section-body">
+      <div class="field-group">
+        <label class="field-label" for="UI_MODTOWN_TITLE">Mission Name (Briefing Screen) <span class="field-key">UI_MODTOWN_TITLE</span></label>
+        <input class="field-input" id="UI_MODTOWN_TITLE" type="text" placeholder="e.g. River Madness" oninput="sync(this)" />
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="UI_MODTOWN_DESC">Briefing Text <span class="field-key">UI_MODTOWN_DESC</span></label>
+        <textarea class="field-input" id="UI_MODTOWN_DESC" placeholder="Enter briefing text here" rows="5" oninput="sync(this)"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header"><span class="section-icon">🚪</span><span class="section-title">Starting Location</span></div>
+    <div class="section-body">
+      <div class="field-group">
+        <label class="field-label" for="UI_STARTING_LOCATION_MODTOWN_OUTSIDE_DEFAULT_NAME">Starting Entrance Name <span class="field-key">UI_STARTING_LOCATION_MODTOWN_OUTSIDE_DEFAULT_NAME</span></label>
+        <input class="field-input" id="UI_STARTING_LOCATION_MODTOWN_OUTSIDE_DEFAULT_NAME" type="text" placeholder="e.g. Route 49" oninput="sync(this)" />
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="UI_STARTING_LOCATION_MODTOWN_OUTSIDE_DESC">Starting Entrance Description <span class="field-key">UI_STARTING_LOCATION_MODTOWN_OUTSIDE_DESC</span></label>
+        <textarea class="field-input" id="UI_STARTING_LOCATION_MODTOWN_OUTSIDE_DESC" placeholder="Enter quirky text here" rows="4" oninput="sync(this)"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header"><span class="section-icon">🎯</span><span class="section-title">Primary Target</span></div>
+    <div class="section-body">
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label" for="NPC_SUPER_TARGETMAN_NAME">
+            Target Name <span class="field-key">NPC_SUPER_TARGETMAN_NAME</span>
+            <span class="sync-badge">⟳ syncs to repository.json</span>
+          </label>
+          <input class="field-input" id="NPC_SUPER_TARGETMAN_NAME" type="text" placeholder="e.g. Target Name" oninput="sync(this)" />
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="NPC_SUPER_TARGETMAN_DESC">Target Short Description <span class="field-key">NPC_SUPER_TARGETMAN_DESC</span></label>
+          <input class="field-input" id="NPC_SUPER_TARGETMAN_DESC" type="text" placeholder="Target is a person." oninput="sync(this)" />
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="bio_actor_Super_Targetman">Target Bio (Full Dossier) <span class="field-key">bio_actor_Super_Targetman</span></label>
+        <textarea class="field-input" id="bio_actor_Super_Targetman" placeholder="Enter target bio details here" rows="7" oninput="sync(this)"></textarea>
+      </div>
+      <div class="repo-preview">
+        <div class="repo-preview-header">🔗 repository.json — <span class="repo-uuid">3ad08b0b-5338-4455-9d02-5a5ac08a2276</span></div>
+        <div class="repo-preview-fields">
+          <div class="repo-preview-row"><span class="repo-field-name">Name</span><span class="repo-field-value" id="preview-name"></span></div>
+          <div class="repo-preview-row"><span class="repo-field-name">Description</span><span class="repo-field-value" id="preview-desc"></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Images -->
+  <div class="section">
+    <div class="section-header"><span class="section-icon">🖼️</span><span class="section-title">Images</span></div>
+    <div class="section-body">
+      <div id="img-no-folder-note" class="img-no-folder-note" style="display:none;">
+        ⚠️ Set a mod folder above to save images directly to the right locations. Images cannot be placed automatically without a linked folder.
+      </div>
+      <div class="img-upload-grid">
+
+        <!-- Target Portrait -->
+        <div class="img-uploader">
+          <div class="img-uploader-label">Target Portrait (693 x 517)</div>
+          <div class="img-drop-zone" id="zone-actor"
+               ondragover="onDragOver(event,'actor')" ondragleave="onDragLeave('actor')" ondrop="onDrop(event,'actor')">
+            <input type="file" accept="image/*" onchange="onFileChange(event,'actor')" />
+            <img id="preview-actor" alt="" />
+            <div class="img-placeholder">
+              <div class="img-placeholder-icon">📷</div>
+              <div>Click or drag image</div>
+            </div>
+          </div>
+          <div class="img-paths">
+            <div class="img-path">blobs/images/actors/<strong>antihero.jpg</strong></div>
+          </div>
+          <div class="img-actions">
+            <span class="img-filename" id="fname-actor">No image selected</span>
+            <button class="btn btn-secondary" style="padding:5px 10px;font-size:12px;" onclick="saveImage('actor')">Save</button>
+          </div>
+        </div>
+
+        <!-- Background -->
+        <div class="img-uploader">
+          <div class="img-uploader-label">Background (1920 x 1080)</div>
+          <div class="img-drop-zone" id="zone-bg"
+               ondragover="onDragOver(event,'bg')" ondragleave="onDragLeave('bg')" ondrop="onDrop(event,'bg')">
+            <input type="file" accept="image/*" onchange="onFileChange(event,'bg')" />
+            <img id="preview-bg" alt="" />
+            <div class="img-placeholder">
+              <div class="img-placeholder-icon">🌄</div>
+              <div>Click or drag image</div>
+            </div>
+          </div>
+          <div class="img-paths">
+            <div class="img-path multi-dest">blobs/images/locations/modlandia/<strong>background.jpg</strong></div>
+            <div class="img-path multi-dest">blobs/images/campaign_demo/modtown/<strong>background.jpg</strong></div>
+          </div>
+          <div class="img-actions">
+            <span class="img-filename" id="fname-bg">No image selected</span>
+            <button class="btn btn-secondary" style="padding:5px 10px;font-size:12px;" onclick="saveImage('bg')">Save</button>
+          </div>
+        </div>
+
+        <!-- Tile -->
+        <div class="img-uploader">
+          <div class="img-uploader-label">Tile (693 x 517)</div>
+          <div class="img-drop-zone" id="zone-tile"
+               ondragover="onDragOver(event,'tile')" ondragleave="onDragLeave('tile')" ondrop="onDrop(event,'tile')">
+            <input type="file" accept="image/*" onchange="onFileChange(event,'tile')" />
+            <img id="preview-tile" alt="" />
+            <div class="img-placeholder">
+              <div class="img-placeholder-icon">🔲</div>
+              <div>Click or drag image</div>
+            </div>
+          </div>
+          <div class="img-paths">
+            <div class="img-path">blobs/images/campaign_demo/modtown/<strong>tile.jpg</strong></div>
+          </div>
+          <div class="img-actions">
+            <span class="img-filename" id="fname-tile">No image selected</span>
+            <button class="btn btn-secondary" style="padding:5px 10px;font-size:12px;" onclick="saveImage('tile')">Save</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<div class="toast-stack" id="toast-stack"></div>
+
+<script>
+const TARGET_UUID = "3ad08b0b-5338-4455-9d02-5a5ac08a2276";
+
+const DEFAULTS = {
+  UI_LOCATION_PARENT_MODLANDIA_COUNTRY: "USA",
+  UI_LOCATION_MODTOWN_COUNTRY: "USA",
+  UI_LOCATION_PARENT_MODLANDIA_CITY: "Waterville Valley",
+  UI_LOCATION_MODTOWN_CITY: "Waterville Valley",
+  UI_LOCATION_MODTOWN_TITLE: "River Madness",
+  UI_MODTOWN_TITLE: "River Madness",
+  UI_MODTOWN_DESC: "Good evening 47, \n\nWelcome to New Hampshire. More specifically, Waterville Valley. A residential ski community in the heart of the White Mountains National Forest. The valley is known to be the birthplace of freestyle skiing and home to the popular Curious George franchise.\n\nYour target is Lord_Zacler, also known as Rick, a disgraced web designer and writer who turned a new leaf into alternative philosophies that put him at odds with his commonplace peers. This has led to the creation of a blog that can be traced to notable events and commentaries over the past year.\n\nNotoriously hidden from public view, it had been a mystery where he was, until his footprint traced him to the semi-sleepy village to enjoy a winter getaway and lay low amidst the changing political climate.\n\nAlongside eliminating him, there is also the task of locating him. Rick uses custom software to prevent his likeness and location data from being accessible on the Internet. You will need to play it by ear and procure whatever tools and intel is needed to locate and neutralize them.\n\nBe mindful: Lord_Zacler is known to be paranoid and compulsively follows strict routines, and will attempt to evacuate if alarmed to your presence, or if something is off enough to warrant action.\n\nYour mission is to eliminate Lord_Zacler and ensure his social network stops right in its tracks.\n\nGood luck.\n",
+  UI_STARTING_LOCATION_MODTOWN_OUTSIDE_DEFAULT_NAME: "Route 49",
+  UI_STARTING_LOCATION_MODTOWN_OUTSIDE_DESC: "47 has made his way to the outskirts of the town, by the town's welcome center on the main road.",
+  NPC_SUPER_TARGETMAN_NAME: "\u201cLord_Zacler\u201d",
+  NPC_SUPER_TARGETMAN_DESC: "Lord_Zacler is a person.",
+  bio_actor_Super_Targetman: "\u201cLord_Zacler\u201d, also known as \u201cZach A.\u201d, is the incoming Executive Director of Eagle Communications, a startup public relations agency in the Washington, DC area, where his personal life are kept remarkably secret from everyone else, even other firm executives. Image data related to him could not be independently verified, so an online profile is used in lieu.\n\nBorn in suburban Massachusetts, Zach entered the world of communications through his personal blog during the COVID-19 Pandemic, which enabled him to write about travel reviews, neurodivergent commentary, and other facets of the twenty-first century.\n\nHe first appeared outside his immediate bubble in July 2021, when his name appeared on the payroll of a reputable web development agency. This expanded the following two years with being on manifest logs for trips across the United States, Czechia, Germany, Poland, and Israel, yet few records exist with any useful information.\n\nWhat is known, however, is that he moved to the Mid-Atlantic region in 2024 for higher education, and quickly engaged with a variety of like-minded peers in the pre-professional space. This led to his joining the agency and quickly rising the ranks within eleven months to become elected the highest position. As he began to make the transition, Zach made the conclusion that the organization is not adequately following accreditation guidelines, and has begun the process of strategically overhauling the entire firm to follow the standards placed on him by the international authorities. This has displeased many current firm members and prior administrators, who now deem him a threat to the organization.\n\nLord_Zacler is a discreet, paranoid, and now-powerful person. One wrong move could set you back on the chess board. So make sure it\u2019s done before he realizes.\n\nBecause believe us, he will figure it out sooner than later."
+};
+
+const state = {};
+let modFolderHandle = null;
+const HAS_FS_API = typeof window.showDirectoryPicker === "function";
+
+// ---- State ----
+
+function val(id) { return state[id] !== undefined ? state[id] : (DEFAULTS[id] ?? ""); }
+
+function sync(el) {
+  state[el.id] = el.value;
+  if (el.id === "NPC_SUPER_TARGETMAN_NAME") {
+    document.getElementById("preview-name").textContent = el.value;
+    document.getElementById("preview-desc").textContent = el.value;
+  }
+}
+
+function resetAll() {
+  Object.keys(DEFAULTS).forEach(id => {
+    state[id] = DEFAULTS[id];
+    const el = document.getElementById(id);
+    if (el) el.value = DEFAULTS[id];
+  });
+  const name = DEFAULTS.NPC_SUPER_TARGETMAN_NAME;
+  document.getElementById("preview-name").textContent = name;
+  document.getElementById("preview-desc").textContent = name;
+}
+
+// ---- Folder picker ----
+
+async function pickFolder() {
+  if (!HAS_FS_API) {
+    showToast("Your browser doesn't support folder selection. Use Chrome or Edge.", "error", 5000);
+    return;
+  }
+  try {
+    const handle = await window.showDirectoryPicker({ mode: "readwrite" });
+
+    // Immediately verify we actually have write permission
+    const permStatus = await handle.queryPermission({ mode: "readwrite" });
+    if (permStatus !== "granted") {
+      // Try to explicitly request it
+      const req = await handle.requestPermission({ mode: "readwrite" });
+      if (req !== "granted") {
+        setFolderBarState("error", "Write permission was denied. Click 'Edit files' when the browser asks.");
+        showToast("Permission denied — make sure to click 'Edit files' when prompted.", "error", 6000);
+        return;
+      }
+    }
+
+    // Do a quick write test to confirm it actually works
+    try {
+      const testHandle = await handle.getFileHandle(".editor-write-test", { create: true });
+      const w = await testHandle.createWritable();
+      await w.write("ok");
+      await w.close();
+      await handle.removeEntry(".editor-write-test");
+    } catch (testErr) {
+      console.error("Write test failed:", testErr);
+      setFolderBarState("error",
+        "Folder selected but writing failed (" + testErr.name + ": " + testErr.message + "). " +
+        "Try a different folder or run the file from a web server."
+      );
+      showToast("Write test failed: " + testErr.message, "error", 7000);
+      return;
+    }
+
+    modFolderHandle = handle;
+    updateImageFolderNote();
+    setFolderBarState("linked",
+      `<span style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">` +
+      `Linked to <span class="folder-name">${handle.name}/</span>` +
+      `<span class="folder-routes">` +
+        `<span class="folder-route">manifest.json \u2192 root</span>` +
+        `<span class="folder-route">repository.json \u2192 content/chunk0/</span>` +
+      `</span></span>`
+    );
+    document.getElementById("btn-pick-folder").textContent = "Change Folder";
+    showToast("Mod folder linked — ready to save directly.", "success");
+  } catch (e) {
+    if (e.name === "AbortError") return; // user cancelled
+    console.error("pickFolder error:", e);
+    showToast("Error: " + e.message, "error", 5000);
+  }
+}
+
+function setFolderBarState(state, html) {
+  const bar = document.getElementById("folder-bar");
+  bar.className = "folder-bar " + state;
+  document.getElementById("folder-bar-text").innerHTML = html;
+}
+
+// ---- Build data ----
+
+function buildManifest() {
+  return {
+    "$schema": "https://raw.githubusercontent.com/atampy25/simple-mod-framework/main/Mod%20Manager/src/lib/manifest-schema.json",
+    "id": "UI.MOCKUP", "name": "Modded Mockups for Missions",
+    "description": "UI/UX mockups for custom missions and levels",
+    "authors": ["Lord_Zacler"], "frameworkVersion": "2.33.35", "version": "0.8.147",
+    "blobsFolders": ["blobs"], "contentFolders": ["content"], "dependencies": [],
+    "peacockPlugins": ["HitmanCampaignDemo.plugin.js"],
+    "packagedefinition": [
+      { "type": "entity", "partition": "greedy", "path": "[assembly:/_pro/scenes/missions/hitman_campaign_demo/mission_bank/scene_bank.entity].entitytemplate" },
+      { "type": "entity", "partition": "season3", "path": "[assembly:/_pro/scenes/missions/hitman_campaign_demo/mission_modtown/scene_modtown.entity].entitytemplate" }
+    ],
+    "localisation": { "english": {
+      "UI_HITMAN_CAMPAIGN_DEMO": "Modded Levels", "UI_STORY": "Story",
+      "UI_BANK_DESC": "I need to take out Target McTargetface.", "UI_BANK_TITLE": "Bank mission",
+      "UI_STARTING_LOCATION_BANK_CEO_OFFICE_DEFAULT_NAME": "CEO's Office",
+      "UI_STARTING_LOCATION_BANK_CEO_OFFICE_DESC": "47 has made his way to the CEO's office.",
+      "NPC_TARGET_MCTARGETFACE_NAME": "Target McTargetface",
+      "NPC_TARGET_MCTARGETFACE_DESC": "Target McTargetface is the new CEO of the Milton-Fitzpatrick Bank.",
+      "UI_LOCATION_PARENT_MODLANDIA_COUNTRY": val("UI_LOCATION_PARENT_MODLANDIA_COUNTRY"),
+      "UI_LOCATION_MODTOWN_COUNTRY": val("UI_LOCATION_MODTOWN_COUNTRY"),
+      "UI_LOCATION_PARENT_MODLANDIA_CITY": val("UI_LOCATION_PARENT_MODLANDIA_CITY"),
+      "UI_LOCATION_MODTOWN_CITY": val("UI_LOCATION_MODTOWN_CITY"),
+      "UI_LOCATION_MODTOWN_TITLE": val("UI_LOCATION_MODTOWN_TITLE"),
+      "UI_MODTOWN_DESC": val("UI_MODTOWN_DESC"),
+      "UI_MODTOWN_TITLE": val("UI_MODTOWN_TITLE"),
+      "UI_LOCATION_PARENT_TENLEY_COUNTRY": "USA", "UI_LOCATION_TT_COUNTRY": "USA",
+      "UI_LOCATION_PARENT_TENLEY_CITY": "Washington", "UI_LOCATION_TT_CITY": "Washington",
+      "UI_LOCATION_TT_TITLE": "Capital Chaos",
+      "UI_STARTING_LOCATION_MODTOWN_OUTSIDE_DEFAULT_NAME": val("UI_STARTING_LOCATION_MODTOWN_OUTSIDE_DEFAULT_NAME"),
+      "UI_STARTING_LOCATION_MODTOWN_OUTSIDE_DESC": val("UI_STARTING_LOCATION_MODTOWN_OUTSIDE_DESC"),
+      "NPC_SUPER_TARGETMAN_NAME": val("NPC_SUPER_TARGETMAN_NAME"),
+      "NPC_SUPER_TARGETMAN_DESC": val("NPC_SUPER_TARGETMAN_DESC"),
+      "NPC_TINA_TARGET_NAME": "Second Target", "NPC_TINA_TARGET_DESC": "Second Town is a mysterious figure tied to the town.",
+      "NPC_EVANGELINE_MOREAU_NAME": "Second Target",
+      "NPC_EVANGELINE_MOREAU_DESC": "One of the 4 leaders of the death cult named the Keepers, She has recently recruited David Dyers to spread her teaching in the town of Whittleton creek. I have intel that she has bought a house in the area.",
+      "bio_actor_Super_Targetman": val("bio_actor_Super_Targetman"),
+      "bio_actor_Tina_Test": "We live in la-la land over here."
+    }},
+    "updateCheck": "https://github.com/dbierek/HitmanCampaignDemo/releases/latest/download/updates.json"
+  };
+}
+
+function buildRepository() {
+  const n = val("NPC_SUPER_TARGETMAN_NAME");
+  return {
+    "73d6f4ac-bfac-4892-b224-2d8dfe56dcb6": { "CommonName": "Outfit Evangeline Moreau", "Description": "Outfit Evangeline Moreau", "Name": "Outfit Evangeline Moreau", "Category": "", "HeroDisguiseAvailable": false, "Image": "", "ImageTransparent": "", "IsHitmanSuit": false, "TokenID": "" },
+    "6bffc1f0-6039-4862-b821-027a5dad3bae": { "CharacterSetIndex": 0, "Description": "Lord_Zacler", "Description_LOC": "bio_actor_Super_Targetman", "Image": "images/campaign_demo/bank/target_mc_targetface.jpg", "Name": "Lord_Zacler", "Outfit": "ac24fc2f-8e34-4173-ba65-e6e267d4f973", "OutfitVariationIndex": 0, "Tile": "images/campaign_demo/bank/target_mc_targetface.jpg" },
+    "92286d13-cfd0-4827-9ce9-398d5f25960a": { "CommonName": "Outfit Second Targectcc dfge", "Description": "Outfit Second Target", "Name": "Outfit Second Target", "Category": "", "HeroDisguiseAvailable": false, "Image": "", "ImageTransparent": "", "IsHitmanSuit": false, "TokenID": "" },
+    "6ba75011-7675-4843-9b9b-3e3618c30c97": { "Image": "images/entrances/bank/bank_entrance_ceo.jpg", "Name_LOC": "UI_STARTING_LOCATION_BANK_CEO_OFFICE_DEFAULT_NAME", "Name": "Bank CEO Office Starting Location", "Description": "UI_STARTING_LOCATION_BANK_CEO_OFFICE_DESC" },
+    [TARGET_UUID]: { "CharacterSetIndex": 0, "Description": n, "Description_LOC": "bio_actor_Super_Targetman", "Image": "images/actors/antihero.jpg", "Name": n, "Outfit": "5f19af97-4ad1-46e4-aaf6-46f856519072", "OutfitVariationIndex": 0, "Tile": "images/actors/antihero.jpg" },
+    "5f19af97-4ad1-46e4-aaf6-46f856519072": { "CommonName": "Outfit Super Targetman", "Description": "Outfit Super Targetman", "Name": "Outfit Super Targetman", "Category": "", "HeroDisguiseAvailable": false, "Image": "", "ImageTransparent": "", "IsHitmanSuit": false, "TokenID": "" },
+    "fb050c59-c51e-41aa-b51e-69fcef1fe718": {},
+    "ac24fc2f-8e34-4173-ba65-e6e267d4f973": { "CommonName": "Outfit Target McTargetface", "Description": "Outfit Target McTargetface", "Name": "Outfit Target McTargetface", "Category": "", "HeroDisguiseAvailable": false, "Image": "", "ImageTransparent": "", "IsHitmanSuit": false, "TokenID": "" },
+    "0cd9e0da-774d-4dd5-adb2-a45d31416cad": { "Image": "images/entrances/modtown/modtown_entrance_outside.jpg", "Name_LOC": "UI_STARTING_LOCATION_MODTOWN_OUTSIDE_DEFAULT_NAME", "Name": "Outside Starting Location", "Description": "UI_STARTING_LOCATION_MODTOWN_OUTSIDE_DESC" },
+    "33396bb9-d16f-4956-a046-14eb3102a0a9": {},
+    "5e230f2a-1364-4e7f-8c67-a42bc94712f9": { "CharacterSetIndex": 0, "Description": "Tina Test", "Description_LOC": "bio_actor_Tina_Test", "Image": "images/campaign_demo/modtown/tina_test.jpg", "Name": "Tina Test", "Outfit": "5f19af97-4ad1-46e4-aaf6-46f856519072", "OutfitVariationIndex": 0, "Tile": "images/campaign_demo/modtown/tina_test.jpg" }
+  };
+}
+
+// ---- Image uploads ----
+
+const IMAGE_CONFIG = {
+  actor: { destinations: [
+    { path: ["blobs","images","actors"], filename: "antihero.jpg" }
+  ]},
+  bg: { destinations: [
+    { path: ["blobs","images","locations","modlandia"],       filename: "background.jpg" },
+    { path: ["blobs","images","campaign_demo","modtown"],     filename: "background.jpg" }
+  ]},
+  tile: { destinations: [
+    { path: ["blobs","images","campaign_demo","modtown"], filename: "tile.jpg" }
+  ]}
+};
+
+const imageUploads = {};
+
+function onFileChange(event, id) {
+  const file = event.target.files[0];
+  if (file) loadImageFile(id, file);
+}
+
+function onDragOver(event, id) {
+  event.preventDefault();
+  document.getElementById("zone-" + id).classList.add("drag-over");
+}
+
+function onDragLeave(id) {
+  document.getElementById("zone-" + id).classList.remove("drag-over");
+}
+
+function onDrop(event, id) {
+  event.preventDefault();
+  document.getElementById("zone-" + id).classList.remove("drag-over");
+  const file = event.dataTransfer.files[0];
+  if (file && file.type.startsWith("image/")) loadImageFile(id, file);
+  else if (file) showToast("Please drop an image file.", "warning");
+}
+
+function loadImageFile(id, file) {
+  imageUploads[id] = file;
+  const preview = document.getElementById("preview-" + id);
+  const fname   = document.getElementById("fname-" + id);
+  if (preview.src) URL.revokeObjectURL(preview.src);
+  preview.src = URL.createObjectURL(file);
+  preview.classList.add("visible");
+  fname.textContent = file.name;
+  fname.classList.add("ready");
+}
+
+function updateImageFolderNote() {
+  const note = document.getElementById("img-no-folder-note");
+  if (note) note.style.display = modFolderHandle ? "none" : "block";
+}
+
+async function saveImage(id) {
+  if (!modFolderHandle) {
+    showToast("Set a mod folder first — images need a folder to save to.", "warning", 4500);
+    return;
+  }
+  const file = imageUploads[id];
+  if (!file) {
+    showToast("No image selected for this slot yet.", "warning");
+    return;
+  }
+  const dests = IMAGE_CONFIG[id].destinations;
+  const errors = [];
+  for (const dest of dests) {
+    try {
+      let dir = modFolderHandle;
+      for (const seg of dest.path) {
+        dir = await dir.getDirectoryHandle(seg, { create: true });
+      }
+      const fh = await dir.getFileHandle(dest.filename, { create: true });
+      const w  = await fh.createWritable();
+      await w.write(file);
+      await w.close();
+    } catch (e) {
+      console.error("saveImage dest failed:", dest, e);
+      errors.push([...dest.path, dest.filename].join("/") + " — " + e.name + ": " + e.message);
+    }
+  }
+  if (errors.length === 0) {
+    const label = dests.length > 1 ? dests.length + " locations" : [modFolderHandle.name, ...dests[0].path, dests[0].filename].join("/");
+    showToast("Saved to " + label, "success");
+  } else {
+    showToast("Image save failed: " + errors[0], "error", 7000);
+  }
+}
+
+async function saveAllImages() {
+  const pending = Object.keys(imageUploads);
+  if (pending.length === 0) return { saved: 0, errors: [] };
+  if (!modFolderHandle) return { saved: 0, errors: ["No mod folder linked"] };
+  const allErrors = [];
+  let savedCount = 0;
+  for (const id of pending) {
+    const dests = IMAGE_CONFIG[id].destinations;
+    for (const dest of dests) {
+      try {
+        let dir = modFolderHandle;
+        for (const seg of dest.path) dir = await dir.getDirectoryHandle(seg, { create: true });
+        const fh = await dir.getFileHandle(dest.filename, { create: true });
+        const w  = await fh.createWritable();
+        await w.write(imageUploads[id]);
+        await w.close();
+        savedCount++;
+      } catch (e) {
+        allErrors.push([...dest.path, dest.filename].join("/") + ": " + e.message);
+      }
+    }
+  }
+  return { saved: savedCount, errors: allErrors };
+}
+
+// ---- File writing ----
+
+async function writeToFolder(dirHandle, subPath, filename, data) {
+  let target = dirHandle;
+  for (const seg of subPath) {
+    target = await target.getDirectoryHandle(seg, { create: true });
+  }
+  const fh = await target.getFileHandle(filename, { create: true });
+  const w = await fh.createWritable();
+  await w.write(JSON.stringify(data, null, "\t"));
+  await w.close();
+}
+
+function fallbackDownload(data, filename) {
+  const blob = new Blob([JSON.stringify(data, null, "\t")], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// Returns { ok: true, path } or { ok: false, error }
+async function saveFile(data, filename, subPath) {
+  if (modFolderHandle) {
+    try {
+      await writeToFolder(modFolderHandle, subPath, filename, data);
+      const fullPath = [modFolderHandle.name, ...subPath, filename].join("/");
+      return { ok: true, path: fullPath };
+    } catch (e) {
+      console.error("writeToFolder failed:", e);
+      return { ok: false, error: e.name + ": " + e.message };
+    }
+  }
+  fallbackDownload(data, filename);
+  return { ok: true, path: "Downloads/" + filename };
+}
+
+function flashBtn(id, label, ms = 2000) {
+  const btn = document.getElementById(id);
+  if (!btn) return;
+  const orig = btn.textContent;
+  btn.textContent = label;
+  setTimeout(() => btn.textContent = orig, ms);
+}
+
+// ---- Download actions ----
+
+async function doSaveManifest() {
+  const result = await saveFile(buildManifest(), "manifest.json", []);
+  if (result.ok) {
+    showToast("Saved: " + result.path, "success");
+    flashBtn("btn-manifest", "Saved!");
+  } else {
+    showToast("Failed to save manifest.json — " + result.error, "error", 7000);
+    flashBtn("btn-manifest", "Failed");
+  }
+}
+
+async function doSaveRepo() {
+  const result = await saveFile(buildRepository(), "campaign_demo.repository.json", ["content", "chunk0"]);
+  if (result.ok) {
+    showToast("Saved: " + result.path, "success");
+    flashBtn("btn-repo", "Saved!");
+  } else {
+    showToast("Failed to save repository.json — " + result.error, "error", 7000);
+    flashBtn("btn-repo", "Failed");
+  }
+}
+
+async function doSaveBoth() {
+  const [r1, r2, imgResult] = await Promise.all([
+    saveFile(buildManifest(), "manifest.json", []),
+    saveFile(buildRepository(), "campaign_demo.repository.json", ["content", "chunk0"]),
+    saveAllImages()
+  ]);
+
+  const jsonErrors = [r1, r2].filter(r => !r.ok).map(r => r.error);
+  const allErrors  = [...jsonErrors, ...imgResult.errors];
+
+  if (allErrors.length === 0) {
+    const imgNote = imgResult.saved > 0 ? ` + ${imgResult.saved} image file(s)` : "";
+    flashBtn("btn-both", "All Saved!");
+    showToast("Both JSON files saved" + imgNote + ".", "success");
+  } else if (allErrors.length < [r1, r2].length + imgResult.saved + allErrors.length) {
+    flashBtn("btn-both", "Partial");
+    showToast("Some saves failed: " + allErrors[0], "error", 8000);
+  } else {
+    flashBtn("btn-both", "Failed");
+    showToast("Saves failed: " + allErrors.join("; "), "error", 8000);
+  }
+}
+
+// ---- Toast ----
+
+function showToast(msg, type = "success", duration = 3000) {
+  const stack = document.getElementById("toast-stack");
+  const el = document.createElement("div");
+  el.className = "toast " + type;
+  el.textContent = msg;
+  stack.appendChild(el);
+  requestAnimationFrame(() => el.classList.add("show"));
+  setTimeout(() => {
+    el.classList.remove("show");
+    setTimeout(() => el.remove(), 300);
+  }, duration);
+}
+
+// ---- Init ----
+
+window.addEventListener("DOMContentLoaded", () => {
+  Object.keys(DEFAULTS).forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = DEFAULTS[id];
+  });
+  const name = DEFAULTS.NPC_SUPER_TARGETMAN_NAME;
+  document.getElementById("preview-name").textContent = name;
+  document.getElementById("preview-desc").textContent = name;
+
+  updateImageFolderNote();
+
+  if (!HAS_FS_API) {
+    const btn = document.getElementById("btn-pick-folder");
+    btn.disabled = true;
+    btn.title = "Not supported — use Chrome or Edge";
+    document.getElementById("folder-bar-text").textContent =
+      "Folder linking requires Chrome or Edge. Files will save to your Downloads folder.";
+  }
+});
+</script>
+</body>
+</html>

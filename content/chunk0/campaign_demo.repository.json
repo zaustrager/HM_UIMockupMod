@@ -1,0 +1,90 @@
+{
+	"73d6f4ac-bfac-4892-b224-2d8dfe56dcb6": {
+		"CommonName": "Outfit Evangeline Moreau",
+		"Description": "Outfit Evangeline Moreau",
+		"Name": "Outfit Evangeline Moreau",
+		"Category": "",
+		"HeroDisguiseAvailable": false,
+		"Image": "",
+		"ImageTransparent": "",
+		"IsHitmanSuit": false,
+		"TokenID": ""
+	},
+	"6bffc1f0-6039-4862-b821-027a5dad3bae": {
+		"CharacterSetIndex": 0,
+		"Description": "Lord_Zacler",
+		"Description_LOC": "bio_actor_Super_Targetman",
+		"Image": "images/campaign_demo/bank/target_mc_targetface.jpg",
+		"Name": "Lord_Zacler",
+		"Outfit": "ac24fc2f-8e34-4173-ba65-e6e267d4f973",
+		"OutfitVariationIndex": 0,
+		"Tile": "images/campaign_demo/bank/target_mc_targetface.jpg"
+	},
+	"92286d13-cfd0-4827-9ce9-398d5f25960a": {
+		"CommonName": "Outfit Second Targectcc dfge",
+		"Description": "Outfit Second Target",
+		"Name": "Outfit Second Target",
+		"Category": "",
+		"HeroDisguiseAvailable": false,
+		"Image": "",
+		"ImageTransparent": "",
+		"IsHitmanSuit": false,
+		"TokenID": ""
+	},
+	"6ba75011-7675-4843-9b9b-3e3618c30c97": {
+		"Image": "images/entrances/bank/bank_entrance_ceo.jpg",
+		"Name_LOC": "UI_STARTING_LOCATION_BANK_CEO_OFFICE_DEFAULT_NAME",
+		"Name": "Bank CEO Office Starting Location",
+		"Description": "UI_STARTING_LOCATION_BANK_CEO_OFFICE_DESC"
+	},
+	"3ad08b0b-5338-4455-9d02-5a5ac08a2276": {
+		"CharacterSetIndex": 0,
+		"Description": "BRIG",
+		"Description_LOC": "bio_actor_Super_Targetman",
+		"Image": "images/actors/antihero.jpg",
+		"Name": "BRIG",
+		"Outfit": "5f19af97-4ad1-46e4-aaf6-46f856519072",
+		"OutfitVariationIndex": 0,
+		"Tile": "images/actors/antihero.jpg"
+	},
+	"5f19af97-4ad1-46e4-aaf6-46f856519072": {
+		"CommonName": "Outfit Super Targetman",
+		"Description": "Outfit Super Targetman",
+		"Name": "Outfit Super Targetman",
+		"Category": "",
+		"HeroDisguiseAvailable": false,
+		"Image": "",
+		"ImageTransparent": "",
+		"IsHitmanSuit": false,
+		"TokenID": ""
+	},
+	"fb050c59-c51e-41aa-b51e-69fcef1fe718": {},
+	"ac24fc2f-8e34-4173-ba65-e6e267d4f973": {
+		"CommonName": "Outfit Target McTargetface",
+		"Description": "Outfit Target McTargetface",
+		"Name": "Outfit Target McTargetface",
+		"Category": "",
+		"HeroDisguiseAvailable": false,
+		"Image": "",
+		"ImageTransparent": "",
+		"IsHitmanSuit": false,
+		"TokenID": ""
+	},
+	"0cd9e0da-774d-4dd5-adb2-a45d31416cad": {
+		"Image": "images/entrances/modtown/modtown_entrance_outside.jpg",
+		"Name_LOC": "UI_STARTING_LOCATION_MODTOWN_OUTSIDE_DEFAULT_NAME",
+		"Name": "Outside Starting Location",
+		"Description": "UI_STARTING_LOCATION_MODTOWN_OUTSIDE_DESC"
+	},
+	"33396bb9-d16f-4956-a046-14eb3102a0a9": {},
+	"5e230f2a-1364-4e7f-8c67-a42bc94712f9": {
+		"CharacterSetIndex": 0,
+		"Description": "Tina Test",
+		"Description_LOC": "bio_actor_Tina_Test",
+		"Image": "images/campaign_demo/modtown/tina_test.jpg",
+		"Name": "Tina Test",
+		"Outfit": "5f19af97-4ad1-46e4-aaf6-46f856519072",
+		"OutfitVariationIndex": 0,
+		"Tile": "images/campaign_demo/modtown/tina_test.jpg"
+	}
+}
