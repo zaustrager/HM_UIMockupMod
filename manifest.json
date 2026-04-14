@@ -16,7 +16,7 @@
 	],
 	"dependencies": [],
 	"peacockPlugins": [
-		"HitmanCampaignDemo.plugin.js"
+		"UIUX.plugin.js"
 	],
 	"packagedefinition": [
 		{
@@ -42,19 +42,19 @@
 			"NPC_TARGET_MCTARGETFACE_DESC": "Target McTargetface is the new CEO of the Milton-Fitzpatrick Bank.",
 			"UI_LOCATION_PARENT_MODLANDIA_COUNTRY": "USA",
 			"UI_LOCATION_MODTOWN_COUNTRY": "USA",
-			"UI_LOCATION_PARENT_MODLANDIA_CITY": "BRIG",
-			"UI_LOCATION_MODTOWN_CITY": "BRIG",
-			"UI_LOCATION_MODTOWN_TITLE": "BRIG",
-			"UI_MODTOWN_DESC": "BRIG\n\nBRIG\n\nBRIG",
-			"UI_MODTOWN_TITLE": "BRIG",
+			"UI_LOCATION_PARENT_MODLANDIA_CITY": "Tenleytown",
+			"UI_LOCATION_MODTOWN_CITY": "Tenleytown",
+			"UI_LOCATION_MODTOWN_TITLE": "Tenleytown",
+			"UI_MODTOWN_DESC": "Tenleytown",
+			"UI_MODTOWN_TITLE": "Tenleytown",
 			"UI_LOCATION_PARENT_TENLEY_COUNTRY": "USA",
 			"UI_LOCATION_TT_COUNTRY": "USA",
 			"UI_LOCATION_PARENT_TENLEY_CITY": "Washington",
 			"UI_LOCATION_TT_CITY": "Washington",
 			"UI_LOCATION_TT_TITLE": "Capital Chaos",
-			"UI_STARTING_LOCATION_MODTOWN_OUTSIDE_DEFAULT_NAME": "BRIG",
-			"UI_STARTING_LOCATION_MODTOWN_OUTSIDE_DESC": "BRIG",
-			"NPC_SUPER_TARGETMAN_NAME": "BRIG",
+			"UI_STARTING_LOCATION_MODTOWN_OUTSIDE_DEFAULT_NAME": "Tenleytown",
+			"UI_STARTING_LOCATION_MODTOWN_OUTSIDE_DESC": "Tenleytown",
+			"NPC_SUPER_TARGETMAN_NAME": "“Lord_Zacler”",
 			"NPC_SUPER_TARGETMAN_DESC": "Lord_Zacler is a person.",
 			"NPC_TINA_TARGET_NAME": "Second Target",
 			"NPC_TINA_TARGET_DESC": "Second Town is a mysterious figure tied to the town.",
