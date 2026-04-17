@@ -2,9 +2,9 @@ This mod is cloned from Atampy26’s Simple Mod Framework Mod Template and dbier
 
 To use this mod, you must have the following items:
 <ul>
-  <li> HITMAN: World of Assassination (EGS/Steam) Version 3.260.1 or above. </li>
-  <li> Simple Mod Framework 2.33.35 </li>
-  <li> The Peacock Project Server 8.7.0 </li>
+  <li> HITMAN: World of Assassination (EGS/Steam) </li>
+  <li> Simple Mod Framework</li>
+  <li> The Peacock Project Server 8.7.0 or above </li>
 </ul>
 
 In the editor.html file, where you can make direct changes, you **must** make sure you choose the correct mod folder on the top, or else the changes won't apply.
