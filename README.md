@@ -3,7 +3,7 @@ This mod is cloned from Atampy26’s Simple Mod Framework Mod Template and dbier
 To use this mod, you must have the following items:
 <ul>
   <li> HITMAN: World of Assassination (EGS/Steam) </li>
-  <li> Simple Mod Framework (Latest Version/Version 2.3.37) </li>
+  <li> Simple Mod Framework (Latest Version/Version 2.3.38) </li>
   <li> The Peacock Project (Latest Version/Version 8.8.0) </li>
 </ul>
 
