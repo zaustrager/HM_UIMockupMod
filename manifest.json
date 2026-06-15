@@ -6,8 +6,8 @@
 	"authors": [
 		"Lord_Zacler"
 	],
-	"frameworkVersion": "2.33.38",
-	"version": "0.8.301",
+	"frameworkVersion": "2.33.39",
+	"version": "0.8.400",
 	"blobsFolders": [
 		"blobs"
 	],
@@ -64,5 +64,5 @@
 			"bio_actor_Tina_Test": "We live in la-la land over here."
 		}
 	},
-	"updateCheck": "https://github.com/dbierek/HitmanCampaignDemo/releases/latest/download/updates.json"
+	"updateCheck": "https://github.com/zaustrager/HM_UIMockupMod/releases/latest/download/updates.json"
 }
